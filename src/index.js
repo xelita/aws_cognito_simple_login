@@ -95,10 +95,33 @@ const signIn = (email, password, onSuccess, onFailure) => {
     let authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
 
     // authentication
-    cognitoUser(email).authenticateUser(authenticationDetails, {
-        onSuccess: onSuccess,
+    let user = cognitoUser(email);
+    user.authenticateUser(authenticationDetails, {
+        onSuccess: (result) => onSuccess(result, user),
         onFailure: onFailure
     });
+};
+
+// delete a registered user
+const deleteUser = (email, password, onSuccess, onFailure) => {
+    // authentication user
+    signIn(
+        email,
+        password,
+        (result, user) => {
+            user.deleteUser((error, result) => {
+                if (error) {
+                    onFailure(error);
+                } else {
+                    onSuccess(result);
+                }
+            });
+        },
+        (error) => {
+            onFailure(error);
+        }
+    );
+
 };
 
 // create an instance of cognito user
@@ -122,3 +145,4 @@ const cognitoUser = (email) => {
 //signUp(email, password, onSuccess, onFailure);
 //confirmSignUp(email, confirmationCode, onSuccess, onFailure);
 //signIn(email, password, onSuccess, onFailure);
+//deleteUser(email, password, onSuccess, onFailure);
